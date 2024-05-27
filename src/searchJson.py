@@ -1,23 +1,25 @@
-from bs4 import BeautifulSoup
+import json
+import pandas as pd
+import re
 from pprint import pprint
-with open('json_report/people-2024-04-29.json', 'r') as f:
+
+
+with open('../example/people-2024-04-29.json', 'r') as f:
     data = f.read()
 
-# Passing the stored data inside
-# the beautifulsoup parser, storing
-# the returned object
-Bs_data = BeautifulSoup(data, "xml")
+#loading data into json dict
+dpm_dict = json.loads(data)
 
-print(Bs_data)
-# Using find() to extract attributes
-# of the first instance of the tag
-b_name = Bs_data.find('raws', {'email':'guzmantello.2091184@studenti.uniroma1.it'})
+users=dpm_dict['rows']
 
-print(b_name)
+#convert dict to dataframe
+df = pd.DataFrame(users)
 
-# Extracting the data stored in a
-# specific attribute of the
-# `child` tag
-#value = b_name.get('test')
-#
-#print(value)
+#filter by column mail not equalt to
+#results=df.loc[df['mail'] != '*@uniroma1.it']
+
+#try lamba function for filter
+
+results = df.apply(lambda row: row[~df['mail'].str.contains("@*uniroma1.it")])
+
+results.to_excel(excel_writer='../results/export.xlsx', sheet_name='Nouniroma1')
