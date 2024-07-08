@@ -54,6 +54,9 @@ else:
     nouniroma1.to_excel(excel_writer=output_file_nouni, sheet_name='No_uniroma1_email')
     uniroma1.to_excel(excel_writer=output_file_uni, sheet_name='Uniroma1_email')
 
+    data = {"rows":uniroma1.to_dict('records')}
+
     if json_file_out != sys.stdout:
      with open(json_file_out, 'w') as json_file:
-            json_file.write(json.dumps(uniroma1.to_dict('records')))
+            #json_file.write(json.dumps(data.to_dict('records')))
+            json_file.write(json.dumps(data))
