@@ -4,30 +4,38 @@ import re
 import sys, getopt
 import argparse
 from pprint import pprint
-from collections import OrderedDict, defaultdict
+from urllib.request import urlopen as urlopen
 
 input_file=''
 output_file=''
+
 parser = argparse.ArgumentParser(description="Argument parser for command line options")
-parser.add_argument('-i','--input', nargs = '?', help = 'Input file to read values in json format', dest="inputFile", required = True)
-parser.add_argument('-u','--url', nargs = '?', help = 'Input url where to read values in json format', dest="urlJson", required = True)
+parser.add_argument('-i','--input', nargs = '?', default="", help = 'Input file to read values in json format', dest="inputFile")
+parser.add_argument('-u','--url', nargs = '?', default="",help = 'Input url where to read values in json format', dest="urlJson")
 parser.add_argument('-ono', '--outputno', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write nouniroma1 to, default standard output', dest = "outputFileNo")
 parser.add_argument('-o', '--output', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write uniroma1 to, default standard output', dest = "outputFile")
 parser.add_argument('-ojson', '--outputjson', nargs = '?', default = sys.stdout, help = 'Output file json to write uniroma1 to, default none', dest = "outputFileJson")
 args = parser.parse_args()
 
+if args.inputFile == "" and args.urlJson == "":
+    parser.error("--urlJson or --InputFile is required.")
+
+if args.inputFile != "" and args.urlJson != "":
+    parser.error("--urlJson and --inpuFile can be use only exclusively each other")
+    
 input_file=args.inputFile
 output_file_nouni=args.outputFileNo
 output_file_uni=args.outputFile
 json_file_out=args.outputFileJson
 url = args.urlJson
 
-if input_file:
+if input_file != "":
     with open(input_file, 'r') as f:
         data = f.read()
 
-if url:
-    data = urlopen(url)
+if url != "":
+    response = urlopen(url)
+    data = response.read()
 
 #loading data into json dict
 dpm_dict = json.loads(data)
