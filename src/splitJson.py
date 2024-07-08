@@ -10,6 +10,7 @@ input_file=''
 output_file=''
 parser = argparse.ArgumentParser(description="Argument parser for command line options")
 parser.add_argument('-i','--input', nargs = '?', help = 'Input file to read values in json format', dest="inputFile", required = True)
+parser.add_argument('-u','--url', nargs = '?', help = 'Input url where to read values in json format', dest="urlJson", required = True)
 parser.add_argument('-ono', '--outputno', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write nouniroma1 to, default standard output', dest = "outputFileNo")
 parser.add_argument('-o', '--output', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write uniroma1 to, default standard output', dest = "outputFile")
 parser.add_argument('-ojson', '--outputjson', nargs = '?', default = sys.stdout, help = 'Output file json to write uniroma1 to, default none', dest = "outputFileJson")
@@ -19,9 +20,14 @@ input_file=args.inputFile
 output_file_nouni=args.outputFileNo
 output_file_uni=args.outputFile
 json_file_out=args.outputFileJson
+url = args.urlJson
 
-with open(input_file, 'r') as f:
-    data = f.read()
+if input_file:
+    with open(input_file, 'r') as f:
+        data = f.read()
+
+if url:
+    data = urlopen(url)
 
 #loading data into json dict
 dpm_dict = json.loads(data)
