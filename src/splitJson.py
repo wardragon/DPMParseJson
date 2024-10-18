@@ -15,6 +15,7 @@ parser.add_argument('-u','--url', nargs = '?', default="",help = 'Input url wher
 parser.add_argument('-ono', '--outputno', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write nouniroma1 to, default standard output', dest = "outputFileNo")
 parser.add_argument('-o', '--output', nargs = '?', default = sys.stdout, help = 'Output file xlsx to write uniroma1 to, default standard output', dest = "outputFile")
 parser.add_argument('-ojson', '--outputjson', nargs = '?', default = sys.stdout, help = 'Output file json to write uniroma1 to, default none', dest = "outputFileJson")
+parser.add_argument('-sun', '--strictuni', help = 'Strict includ only @uniroma1.it an no subsets', action=argparse.BooleanOptionalAction, dest="sun" )
 args = parser.parse_args()
 
 if args.inputFile == "" and args.urlJson == "":
@@ -28,6 +29,7 @@ output_file_nouni=args.outputFileNo
 output_file_uni=args.outputFile
 json_file_out=args.outputFileJson
 url = args.urlJson
+sun = args.sun
 
 if input_file != "":
     with open(input_file, 'r') as f:
@@ -52,7 +54,14 @@ df = pd.DataFrame(users)
 
 nouniroma1 = df.apply(lambda row: row[~df['mail'].str.contains("@*uniroma1.it")])
 nostruct =  df.apply(lambda row: row[df['structure_name'].str.contains("NON ASSEGNATO")])
-atuniroma1 = df.apply(lambda row: row[df['mail'].str.contains("@*uniroma1.it")])
+
+if sun:
+    print("sun is true, restrict only to @uniroma1.it")
+    atuniroma1 = df.apply(lambda row: row[df['mail'].str.contains("@uniroma1.it")])
+else:
+    print ("sun is false, include all @*uniroma1.it")
+    atuniroma1 = df.apply(lambda row: row[df['mail'].str.contains("@*uniroma1.it")])
+
 uniroma1= atuniroma1.apply(lambda row: row[~atuniroma1['structure_name'].str.contains("NON ASSEGNATO")])
 
 nouniroma1=nouniroma1.append(nostruct)
