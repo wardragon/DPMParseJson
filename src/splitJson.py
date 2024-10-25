@@ -42,7 +42,9 @@ def splitJson(input_file, url, sun, output_file_nouni, output_file_uni,json_file
    
    uniroma1= atuniroma1.apply(lambda row: row[~atuniroma1['structure_name'].str.contains("NON ASSEGNATO")])
    
-   nouniroma1=nouniroma1.append(nostruct)
+   #nouniroma1=nouniroma1.append(nostruct)
+   nouniroma1=pd.concat([nouniroma1, nostruct])
+   
    print("Saving extracted data to file...") 
    if output_file_nouni == sys.stdout or output_file_uni==sys.stdout:
        print("--- Elenco No Uniroma1 ----------------")
