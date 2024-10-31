@@ -3,6 +3,8 @@ import datetime
 import threading
 import time
 import configparser
+import io
+import sys
 from splitJson import *  # Importa tutto il contenuto dal modulo splitJson
 
 # Funzione per ottenere la data corrente
@@ -35,6 +37,41 @@ def update_time(window):
         window['-TIME-'].update(current_time)
         time.sleep(1)
 
+# Funzione per eseguire splitJson e visualizzare l'output in tempo reale
+def run_splitjson_and_show_output(input_file, url, sun, output_file_nouni, output_file_uni, json_file_out):
+    # Layout della finestra di output
+    output_layout = [
+        [sg.Multiline(size=(80, 20), key='-OUTPUT-', font=('Courier New', 10), autoscroll=True, disabled=True)],
+        [sg.Button('Chiudi', key='-CLOSE-', size=(10, 1), font=('Helvetica', 12), pad=((450, 0), (10, 10)))]
+    ]
+    output_window = sg.Window('Output SplitJson', output_layout, modal=True, finalize=True)
+
+    # Cattura l'output di console
+    buffer = io.StringIO()
+    sys.stdout = buffer  # Reindirizza stdout al buffer
+
+    # Avvia splitJson in un thread separato
+    def run_splitJson():
+        try:
+            splitJson(input_file, url, sun, output_file_nouni, output_file_uni, json_file_out)
+        finally:
+            sys.stdout = sys.__stdout__  # Ripristina stdout
+
+    thread = threading.Thread(target=run_splitJson, daemon=True)
+    thread.start()
+
+    # Aggiorna la finestra con l'output di console in tempo reale
+    while thread.is_alive() or buffer.tell() > 0:
+        output_text = buffer.getvalue()  # Ottiene il contenuto attuale del buffer
+        output_window['-OUTPUT-'].update(output_text)
+        event, _ = output_window.read(timeout=100)
+        if event == '-CLOSE-':
+            break
+
+    output_window.close()
+    thread.join()  # Assicurati che il thread finisca
+    sys.stdout = sys.__stdout__  # Ripristina stdout
+
 # Funzione principale per lanciare l'interfaccia GUI
 def launchGui():
     # Carica le impostazioni dal file config.ini
@@ -54,13 +91,10 @@ def launchGui():
     initial_values = {}
     for var_name, (default_value, _) in variables_info.items():
         if config.has_option('Settings', var_name):
-            # Carica il valore dal file di configurazione
             initial_values[var_name] = config.get('Settings', var_name)
-            # Converti "sun" in boolean se necessario
             if var_name == 'sun':
                 initial_values[var_name] = config.getboolean('Settings', var_name)
         else:
-            # Usa il valore di default
             initial_values[var_name] = default_value
 
     # Layout dell'interfaccia
@@ -68,7 +102,6 @@ def launchGui():
         [
             sg.Column([
                 [sg.Text('', size=(8, 1), font=('Helvetica', 48), justification='center', key='-TIME-')],
-                # Campi per le variabili
                 *[
                     [sg.Text(var_name, size=(15, 1)), 
                      sg.Input(default_text=initial_values[var_name], tooltip=variables_info[var_name][1], key=f'-{var_name.upper()}-', size=(60, 1), enable_events=True)]
@@ -103,11 +136,11 @@ def launchGui():
             output_file_uni = values['-OUTPUT_FILE_UNI-']
             json_file_out = values['-JSON_FILE_OUT-']
             url = values['-URL-']
-            sun = values['-SUN-'] in ('True', 'true', '1', True)  # Converte in bool se necessario
+            sun = values['-SUN-'] in ('True', 'true', '1', True)
 
-            # Richiama la funzione splitJson con i valori specificati
-            splitJson(input_file, url, sun, output_file_nouni, output_file_uni, json_file_out)
-        
+            # Esegui splitJson e mostra l'output in una finestra separata
+            run_splitjson_and_show_output(input_file, url, sun, output_file_nouni, output_file_uni, json_file_out)
+
         # Mostra il pulsante "Salva" se una variabile è stata modificata
         if event.startswith('-') and event.endswith('-'):
             modified = True
@@ -116,18 +149,12 @@ def launchGui():
         # Salva i valori nel file config.ini quando si clicca "Salva"
         if event == '-SALVA-' and modified:
             try:
-                # Crea un dizionario con i valori aggiornati
                 config_values = {k[1:-1].lower(): v for k, v in values.items() if k.startswith('-') and k.endswith('-')}
                 save_config(config_values)
-
-                # Mostra un popup di conferma salvataggio con un pulsante "OK"
                 sg.popup("Configurazione salvata con successo!", title="Esito del Salvataggio", button_type=sg.POPUP_BUTTONS_OK)
-                window['-SALVA-'].update(visible=False)  # Nasconde il pulsante "Salva" dopo il salvataggio
-                modified = False  # Resetta il flag di modifica
+                window['-SALVA-'].update(visible=False)
+                modified = False
             except Exception as e:
                 sg.popup_error(f"Errore nel salvataggio della configurazione: {e}")
 
-    # Chiudi la finestra
     window.close()
-
-# Non chiamare più launchGui() alla fine del codice
