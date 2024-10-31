@@ -1,0 +1,7 @@
+[Settings]
+input_file = 
+output_file_nouni = nouniroma1.xlsx
+output_file_uni = uniroma1.xlsx
+json_file_out = data-to-import-20241024.json
+url = SERVICE_URL
+sun = True

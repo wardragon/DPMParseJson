@@ -2,3 +2,4 @@ example/
 results/
 src/uniroma1_run.sh
 src/__pycache__
+src/config.ini
