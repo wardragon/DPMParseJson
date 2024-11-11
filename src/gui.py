@@ -6,6 +6,7 @@ import configparser
 import io
 import sys
 from splitJson import *  # Importa tutto il contenuto dal modulo splitJson
+from pathlib import Path
 
 # Funzione per ottenere la data corrente
 def current_date_str():
@@ -76,13 +77,13 @@ def run_splitjson_and_show_output(input_file, url, sun, output_file_nouni, outpu
 def launchGui():
     # Carica le impostazioni dal file config.ini
     config = load_config()
-
+    path=Path.home() / "Documents"
     # Definizione dei valori di default delle variabili e dei tooltip
     variables_info = {
         "input_file": ("", "Percorso del file di input."),
-        "output_file_nouni": (f"nouniroma1-{current_date_str()}.xlsx", "Nome del file di output senza univocità."),
-        "output_file_uni": (f"uniroma1-{current_date_str()}.xlsx", "Nome del file di output con univocità."),
-        "json_file_out": (f"data-to-import-{current_date_str()}.json", "Nome del file JSON di output."),
+        "output_file_nouni": (path / f"nouniroma1-{current_date_str()}.xlsx", "Nome del file di output senza univocità."),
+        "output_file_uni": (path / f"uniroma1-{current_date_str()}.xlsx", "Nome del file di output con univocità."),
+        "json_file_out": (path / f"data-to-import-{current_date_str()}.json", "Nome del file JSON di output."),
         "url": ("https://services.uniroma1.it/api/1.0/people-ict-view", "URL per recuperare i dati."),
         "sun": (True, "Attiva/disattiva l'opzione Sun.")
     }
