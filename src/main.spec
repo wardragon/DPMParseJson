@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('config.ini.example', '.')],
+    datas=[('config.ini.example', '.'), ('icon/icona.ico', 'icon')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -32,6 +32,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='icon/icona.ico',
 )
 coll = COLLECT(
     exe,
