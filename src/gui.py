@@ -77,7 +77,7 @@ def run_splitjson_and_show_output(input_file, url, sun, output_file_nouni, outpu
 def launchGui():
     # Carica le impostazioni dal file config.ini
     config = load_config()
-    path=Path.home() / "Documents"
+    path=Path.home() / "Documents/\DPMJsonParse_Output"
     # Definizione dei valori di default delle variabili e dei tooltip
     variables_info = {
         "input_file": ("", "Percorso del file di input."),
